@@ -1,0 +1,13 @@
+# .gitignore
+.env
+/.idea
+/vendor
+/logs
+!/logs/.gitkeep
+/var
+!/var/cache/.gitkeep
+/public/storage/data/*
+!/public/storage/data/.gitkeep
+!/public/storage/data/html/.gitkeep
+!/public/storage/data/images/.gitkeep
+composer.lock

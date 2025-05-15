@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+<style>
+    #swagger-ui {
+            max-width: 1460px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+</style>
+<section id="storage-section" class="dashboard-section space-y-6">
+    <div id="swagger-ui"></div>
+</section>
+<script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+<script>
+    window.onload = () => {
+        window.ui = SwaggerUIBundle({
+            url: '/docs/openapi.yaml?v=1.0',
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIBundle.SwaggerUIStandalonePreset
+            ],
+        });
+    };
+</script>

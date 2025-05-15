@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Litesupabase - Lightweight Backend Infrastructure</title>
+    <meta name="description" content="A lightweight backend infrastructure with Authentication, Storage, Database, and API management.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #111827;
+            --secondary-color: #ffffff;
+            --accent-color: #4F46E5;
+            --text-color: #374151;
+            --light-gray: #F9FAFB;
+            --border-color: #E5E7EB;
+            --hover-color: #6366F1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        }
+
+        body {
+            line-height: 1.75;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: var(--light-gray);
+        }
+
+        .nav-links .nav-button {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 0 6rem;
+            text-align: center;
+            background: linear-gradient(to bottom, #fff, var(--light-gray));
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-color);
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light-gray);
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-card {
+            background: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+
+        .feature-card p {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .feature-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: gap 0.3s ease;
+        }
+
+        .feature-link:hover {
+            gap: 0.75rem;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        @media (max-width:1024px) {
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+
+        .step-card {
+            background: var(--secondary-color);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -1rem;
+            left: -1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .step-card h3 {
+            margin: 1rem 0;
+            color: var(--text-color);
+        }
+
+        .step-card p {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .step-card code {
+            display: block;
+            background: var(--light-gray);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            color: var(--primary-color);
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            background: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--light-gray);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* Code Section */
+        .code-section {
+            padding: 6rem 0;
+            background: var(--light-gray);
+        }
+
+        .code-container {
+            background: var(--primary-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .code-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .code-tab {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .code-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .code-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .code-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #FF5F56;
+        }
+
+        .code-dots span:nth-child(2) {
+            background: #FFBD2E;
+        }
+
+        .code-dots span:nth-child(3) {
+            background: #27C93F;
+        }
+
+        .code-content {
+            color: var(--secondary-color);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .code-content .comment {
+            color: #6B7280;
+        }
+
+        .code-content .method {
+            color: #60A5FA;
+        }
+
+        .code-content .string {
+            color: #34D399;
+        }
+
+        .code-content .number {
+            color: #F472B6;
+        }
+
+        /* Community Section */
+        .community {
+            padding: 6rem 0;
+            background: var(--secondary-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            color: var(--text-color);
+            font-size: 1.125rem;
+        }
+
+        /* Waitlist Section */
+        .waitlist {
+            padding: 6rem 0;
+            background: var(--light-gray);
+            text-align: center;
+        }
+
+        .waitlist-form {
+            max-width: 500px;
+            margin: 3rem auto 0;
+            padding: 2rem;
+            background: var(--secondary-color);
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .form-submit:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        /* MIT License Section */
+        .license {
+            padding: 4rem 0;
+            background: var(--light-gray);
+            text-align: center;
+        }
+
+        .license-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .license-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 4rem 0 2rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            color: var(--secondary-color);
+            opacity: 0.8;
+            transition: all 0.2s ease;
+            font-size: 1.5rem;
+        }
+
+        .social-links a:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+        .menu-toggle {
+            display: none;
+        }
+        .quick-start {
+            margin: 50px auto;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                padding: 1rem 0;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                right: 1rem;
+                top: 1.25rem;
+                font-size: 1.5rem;
+                color: var(--primary-color);
+                background: none;
+                border: none;
+                cursor: pointer;
+            }
+
+            .hero {
+                padding: 6rem 1rem 4rem;
+            }
+
+            .hero h1 {
+                font-size: 2.25rem;
+                line-height: 1.2;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+                padding: 0;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .features-grid, .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 1rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .code-container {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+
+            .code-content {
+                font-size: 0.8rem;
+                overflow-x: auto;
+            }
+
+            .section-header {
+                padding: 0 1rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.875rem;
+            }
+
+            .waitlist-form {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .stat-item h3 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="/" class="logo">Litesupabase</a>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="/docs">Documentation</a></li>
+                <li><a href="/admin/api">API</a></li>
+                <li><a href="/admin" class="nav-button"><i class="fas fa-columns"></i> Dashboard</a></li>
+            </ul>
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Lite Supabase</h1>
+            <p> A lightweight alternative to Supabase for modern web applications.  Build scalable applications with authentication, database, storage and restful APIs.</p>
+            <div class="button-group">
+                <a href="/admin" class="btn btn-primary">
+                    <i class="fas fa-columns"></i>
+                    Dashboard
+                </a>
+                <a href="/auth.html" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Authentication Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Core Features</h2>
+                <p>All the essential tools you need</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>Authentication</h3>
+                    <p>User management and authentication system</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Database</h3>
+                    <p>Powered by Adminer for easy database management</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <h3>Storage</h3>
+                    <p>File management with Tiny File Manager</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>API Documentation</h3>
+                    <p>Interactive API documentation and testing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="code-examples">
+        <div class="container">
+            <div class="section-header">
+                <h2>Easy Integration</h2>
+                <p>Simple REST API for authentication</p>
+            </div>
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="code-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="code-content">
+                    <pre><code><span class="comment">// Login Example using fetch API</span>
+<span class="keyword">async</span> <span class="method">function</span> <span class="function">login</span>() {
+    <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(<span class="string">'/api/auth/login'</span>, {
+        method: <span class="string">'POST'</span>,
+        headers: {
+            <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+        },
+        body: JSON.stringify({
+            email: <span class="string">'user@example.com'</span>,
+            password: <span class="string">'your-password'</span>
+        })
+    });
+
+    <span class="keyword">const</span> data = <span class="keyword">await</span> response.json();
+    
+    <span class="comment">// Handle the response</span>
+    <span class="keyword">if</span> (response.ok) {
+        <span class="comment">// Login successful</span>
+        localStorage.setItem(<span class="string">'token'</span>, data.token);
+        <span class="keyword">return</span> data;
+    } <span class="keyword">else</span> {
+        <span class="comment">// Handle error</span>
+        <span class="keyword">throw new</span> Error(data.message);
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="quick-start">
+        <div class="container">
+            <div class="section-header">
+                <h2>Quick Start Guide</h2>
+                <p>Get started in minutes with our comprehensive tools</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Access Dashboard</h3>
+                    <p>Centralized admin dashboard for all services</p>
+                    <a href="/admin" class="feature-link">
+                        <code>/admin</code>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Configure Auth</h3>
+                    <p>Manage users, roles, and authentication settings</p>
+                    <a href="/admin/auth" class="feature-link">
+                        <code>/admin/auth</code>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Manage Data</h3>
+                    <p>Intuitive database management with Adminer</p>
+                    <a href="/admin/db" class="feature-link">
+                        <code>/admin/db</code>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Handle Files</h3>
+                    <p>Efficient file management with Tiny File Manager</p>
+                    <a href="/admin/storage" class="feature-link">
+                        <code>/admin/storage</code>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="community" id="community">
+        <div class="container">
+            <div class="section-header">
+                <h2>Join Our Growing Community</h2>
+                <p>Built by developers, for developers. Join us in making backend development simpler.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>10k+</h3>
+                    <p>GitHub Stars</p>
+                </div>
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Contributors</p>
+                </div>
+                <div class="stat-item">
+                    <h3>1M+</h3>
+                    <p>Downloads</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="license">
+        <div class="container">
+            <div class="license-content">
+                <span class="license-badge">MIT License</span>
+                <h2>100% Open Source</h2>
+                <p>Litesupabase is free and open source under the MIT license. Use it in personal or commercial projects.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 Litesupabase. MIT Licensed.</p>
+            <p>Developed by <a href="https://www.cloudkoonly.com" target="_blank" rel="noopener noreferrer">Cloudkoonly</a></p>
+        </div>
+    </footer>
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.createElement('button');
+        menuToggle.className = 'menu-toggle';
+        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        
+        const navContainer = document.querySelector('.nav-container');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navContainer.insertBefore(menuToggle, navLinks);
+        
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuToggle.innerHTML = navLinks.classList.contains('active') 
+                ? '<i class="fas fa-times"></i>' 
+                : '<i class="fas fa-bars"></i>';
+        });
+
+        // Code tabs interaction
+        const codeTabs = document.querySelectorAll('.code-tab');
+        const codeContent = document.querySelector('.code-content');
+        
+        const codeExamples = {
+            'Authentication': `<span class="comment">// Authentication API</span>
+<span class="method">POST</span> /api/auth/login
+{
+    "email": <span class="string">"user@example.com"</span>,
+    "password": <span class="string">"secure_password"</span>
+}
+
+<span class="comment">// Response</span>
+{
+    "token": <span class="string">"jwt_token_here"</span>,
+    "user": {
+        "id": <span class="number">1</span>,
+        "email": <span class="string">"user@example.com"</span>
+    }
+}`,
+            'Database': `<span class="comment">// Database API</span>
+<span class="method">GET</span> /api/data/tables/users
+<span class="comment">// Query with filters</span>
+{
+    "select": ["id", "name", "email"],
+    "where": {
+        "status": <span class="string">"active"</span>
+    },
+    "limit": <span class="number">10</span>
+}`,
+            'Storage': `<span class="comment">// Storage API</span>
+<span class="method">POST</span> /api/storage/upload
+<span class="comment">// Multipart form data</span>
+{
+    "bucket": <span class="string">"public"</span>,
+    "file": <span class="string">"profile.jpg"</span>,
+    "contentType": <span class="string">"image/jpeg"</span>
+}`
+        };
+
+        codeTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                codeTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update code content
+                const example = codeExamples[tab.textContent];
+                if (example) {
+                    codeContent.innerHTML = `<code>${example}</code>`;
+                }
+            });
+        });
+
+        // Waitlist form submission
+        function submitWaitlist() {
+            const form = document.getElementById('waitlistForm');
+            const formData = new FormData(form);
+            
+            // Here you would typically send this data to your backend
+            console.log('Form submitted:', Object.fromEntries(formData));
+            
+            // Show success message
+            form.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                    <h3 style="margin-bottom: 1rem;">Thank you for joining!</h3>
+                    <p>We'll keep you updated on our progress.</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<section id="database-section" class="dashboard-section space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold tracking-tight">Database Management</h2>
+        <a href="/db/index.php?token=<?php echo $ssoToken; ?>" target="_blank" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4">
+            <i class="fas fa-database mr-2"></i> Database Admin
+        </a>
+    </div>
+
+    <!-- Database Connection Info -->
+    <div class="grid gap-6 md:grid-cols-2">
+        <!-- Connection Details Card -->
+        <div class="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-border bg-muted/50">
+                <h3 class="font-medium flex items-center">
+                    <i class="fas fa-server mr-2"></i> Connection Details
+                </h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid gap-4">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Host</label>
+                        <div class="flex items-center bg-muted/30 rounded p-2">
+                            <i class="fas fa-network-wired text-muted-foreground mr-2"></i>
+                            <span><?php echo $db['host']; ?></span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Port</label>
+                        <div class="flex items-center bg-muted/30 rounded p-2">
+                            <i class="fas fa-plug text-muted-foreground mr-2"></i>
+                            <span><?php echo $db['port']; ?></span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Database</label>
+                        <div class="flex items-center bg-muted/30 rounded p-2">
+                            <i class="fas fa-database text-muted-foreground mr-2"></i>
+                            <span><?php echo $db['driver']; ?></span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Username</label>
+                        <div class="flex items-center bg-muted/30 rounded p-2">
+                            <i class="fas fa-user text-muted-foreground mr-2"></i>
+                            <span><?php echo $db['user']; ?></span>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Password</label>
+                        <div class="flex items-center bg-muted/30 rounded p-2">
+                            <i class="fas fa-key text-muted-foreground mr-2"></i>
+                            <span>••••••••</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-border bg-muted/50">
+                <h3 class="font-medium flex items-center">
+                    <i class="fas fa-bolt mr-2"></i> Quick Actions
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium mb-2">Select Database</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <?php foreach ($db['databases'] as $dbname): ?>
+                            <a href="/db/index.php?db=<?php echo urlencode($dbname); ?>&token=<?php echo $ssoToken; ?>" target="_blank"
+                               class="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+                                <div class="flex items-center space-x-2 overflow-hidden">
+                                    <i class="fas fa-database text-primary"></i>
+                                    <div class="truncate">
+                                        <span class="text-sm font-medium"><?php echo htmlspecialchars($dbname); ?></span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted-foreground text-xs"></i>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-border my-4"></div>
+
+                    <a href="/db/index.php?token=<?php echo $ssoToken; ?>" target="_blank"
+                       class="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-table text-xl text-primary"></i>
+                            <div>
+                                <h4 class="font-medium">Manage All</h4>
+                                <p class="text-sm text-muted-foreground">View and manage all databases</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted-foreground"></i>
+                    </a>
+
+                    <a href="/db/index.php?sql=&token=<?php echo $ssoToken; ?>" target="_blank"
+                       class="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-code text-xl text-primary"></i>
+                            <div>
+                                <h4 class="font-medium">SQL Console</h4>
+                                <p class="text-sm text-muted-foreground">Execute custom SQL queries</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted-foreground"></i>
+                    </a>
+
+                    <a href="/db/index.php?dump=&token=<?php echo $ssoToken; ?>" target="_blank"
+                       class="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-download text-xl text-primary"></i>
+                            <div>
+                                <h4 class="font-medium">Backup Database</h4>
+                                <p class="text-sm text-muted-foreground">Export database or table backups</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted-foreground"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

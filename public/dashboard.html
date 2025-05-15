@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiteSupabase - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @media (max-width: 768px) {
+            .sidebar-open {
+                transform: translateX(0);
+            }
+            .sidebar-closed {
+                transform: translateX(-100%);
+            }
+        }
+        .nav-item.active {
+            background-color: #EBF5FF;
+            color: #2563EB;
+            border-right: 3px solid #2563EB;
+        }
+        .nav-item:not(.active):hover {
+            background-color: #F3F4F6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden">
+    <div class="h-screen flex">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg hover:bg-gray-50">
+            <i class="fas fa-bars text-gray-600"></i>
+        </button>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen overflow-y-auto fixed z-40 transition-transform duration-300 ease-in-out md:translate-x-0 sidebar-closed md:relative md:shadow-lg">
+
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-1xl font-bold text-blue-600">LiteSupabase Demo</h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 py-4 space-y-1">
+                <a href="#dashboard" class="nav-item flex items-center px-6 py-3 text-gray-600 transition-all duration-200 active">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-2 font-medium">Dashboard</span>
+                </a>
+                <a href="#projects" class="nav-item flex items-center px-6 py-3 text-gray-600 transition-all duration-200">
+                    <i class="fas fa-project-diagram w-6"></i>
+                    <span class="ml-2 font-medium">Projects</span>
+                </a>
+                <a href="#billing" class="nav-item flex items-center px-6 py-3 text-gray-600 transition-all duration-200">
+                    <i class="fas fa-credit-card w-6"></i>
+                    <span class="ml-2 font-medium">Billing</span>
+                </a>
+            </nav>
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-3 hover:bg-gray-100 p-2 rounded-lg w-full transition-colors">
+                        <img id="userAvatar" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp" class="w-8 h-8 rounded-full">
+                        <span id="userName" class="flex-1 text-left text-gray-700">Loading...</span>
+                        <i class="fas fa-chevron-up text-sm text-gray-400"></i>
+                    </button>
+                    <!-- User Menu Dropdown -->
+                    <div id="userMenu" class="hidden absolute bottom-full left-0 w-full mb-2 bg-white rounded-lg shadow-lg border border-gray-200">
+                        <a href="#settings" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-cog w-5"></i> Settings
+                        </a>
+                        <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-sign-out-alt w-5"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow">
+                <div class="flex justify-between items-center px-6 py-4">
+                    <h2 id="pageTitle" class="text-2xl font-semibold text-gray-800">Dashboard</h2>
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <button class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <!-- Dashboard Section -->
+                <div id="dashboardContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Statistics Cards -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-gray-700 text-lg font-semibold">Total Projects</h3>
+                            <i class="fas fa-project-diagram text-blue-500"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-800 mt-4">12</p>
+                        <p class="text-gray-600 text-sm mt-2">↑ 10% from last month</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-gray-700 text-lg font-semibold">Active Users</h3>
+                            <i class="fas fa-users text-green-500"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-800 mt-4">1,234</p>
+                        <p class="text-gray-600 text-sm mt-2">↑ 15% from last month</p>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-gray-700 text-lg font-semibold">Storage Used</h3>
+                            <i class="fas fa-database text-purple-500"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-800 mt-4">85%</p>
+                        <p class="text-gray-600 text-sm mt-2">of 1TB quota</p>
+                    </div>
+                </div>
+
+                <!-- Projects Section (Hidden by default) -->
+                <div id="projectsContent" class="hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-800">Your Projects</h3>
+                                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i> New Project
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Project Card -->
+                                <div class="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-between items-start">
+                                        <h4 class="text-lg font-semibold text-gray-800">Project Name</h4>
+                                        <div class="text-sm text-gray-500">2 days ago</div>
+                                    </div>
+                                    <p class="text-gray-600 mt-2">Project description goes here...</p>
+                                    <div class="mt-4 flex justify-between items-center">
+                                        <div class="flex -space-x-2">
+                                            <img src="https://www.gravatar.com/avatar/1?d=mp" class="w-6 h-6 rounded-full border-2 border-white">
+                                            <img src="https://www.gravatar.com/avatar/2?d=mp" class="w-6 h-6 rounded-full border-2 border-white">
+                                        </div>
+                                        <button class="text-blue-500 hover:text-blue-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing Section (Hidden by default) -->
+                <div id="billingContent" class="hidden">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="p-6 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Billing & Usage</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Current Plan -->
+                                <div class="border rounded-lg p-6">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Current Plan</h4>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="text-2xl font-bold text-gray-800">Free Tier</p>
+                                            <p class="text-gray-600">$0/month</p>
+                                        </div>
+                                        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                                            Upgrade
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Usage -->
+                                <div class="border rounded-lg p-6">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Usage This Month</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                                <span>Database Storage</span>
+                                                <span>50MB / 500MB</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-blue-500 h-2 rounded-full" style="width: 10%"></div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                                <span>API Requests</span>
+                                                <span>1,234 / 10,000</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 12%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Token Manager from auth.html
+        const TokenManager = {
+            setTokens(accessToken, refreshToken) {
+                localStorage.setItem('access_token', accessToken);
+                localStorage.setItem('refresh_token', refreshToken);
+            },
+            
+            getAccessToken() {
+                return localStorage.getItem('access_token');
+            },
+            
+            getRefreshToken() {
+                return localStorage.getItem('refresh_token');
+            },
+            
+            clearTokens() {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+            },
+            
+            isTokenExpired(token) {
+                if (!token) return true;
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.exp * 1000 < Date.now();
+                } catch (e) {
+                    return true;
+                }
+            }
+        };
+
+        // Check authentication on page load
+        window.addEventListener('load', async () => {
+            const token = TokenManager.getAccessToken();
+            if (!token || TokenManager.isTokenExpired(token)) {
+                window.location.href = '/auth.html';
+                return;
+            }
+
+            // Load user profile
+            try {
+                const response = await fetch('/api/auth/user', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const userData = await response.json();
+                    console.log(userData);
+                    document.getElementById('userName').textContent = userData.email;
+                    if (userData.avatar_url) {
+                        document.getElementById('userAvatar').src = userData.avatar_url;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load user profile:', error);
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-closed');
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 768 && 
+                !sidebar.contains(e.target) && 
+                !mobileMenuBtn.contains(e.target)) {
+                sidebar.classList.remove('sidebar-open');
+                sidebar.classList.add('sidebar-closed');
+            }
+        });
+
+        // Close sidebar when window resizes to desktop size
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('sidebar-open', 'sidebar-closed');
+            } else {
+                sidebar.classList.add('sidebar-closed');
+            }
+        });
+
+        // Navigation
+        const contentSections = ['dashboard', 'projects', 'billing'];
+        const navLinks = document.querySelectorAll('nav a');
+
+        // Close mobile menu when clicking on a nav link
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('sidebar-open');
+                    sidebar.classList.add('sidebar-closed');
+                }
+            });
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.getAttribute('href').substring(1);
+                
+                // Update active state
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = section.charAt(0).toUpperCase() + section.slice(1);
+                
+                // Show/hide content sections
+                contentSections.forEach(s => {
+                    const content = document.getElementById(`${s}Content`);
+                    content.classList.toggle('hidden', s !== section);
+                });
+            });
+        });
+
+        // User Menu Toggle
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenu = document.getElementById('userMenu');
+        
+        userMenuBtn.addEventListener('click', () => {
+            userMenu.classList.toggle('hidden');
+            const icon = userMenuBtn.querySelector('.fas.fa-chevron-up');
+            icon.style.transform = userMenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userMenuBtn.contains(e.target)) {
+                userMenu.classList.add('hidden');
+                const icon = userMenuBtn.querySelector('.fas.fa-chevron-up');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                const token = TokenManager.getAccessToken();
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout failed:', error);
+            } finally {
+                TokenManager.clearTokens();
+                window.location.href = '/auth.html';
+            }
+        });
+    </script>
+</body>
+</html>

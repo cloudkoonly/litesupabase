@@ -1,0 +1,75 @@
+<?php echo $data['header']; ?>
+<body class="min-h-screen">
+<!-- Login Screen (initially visible) -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="bg-card rounded-lg shadow-lg p-6 border border-border">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-card-foreground">Lite Supabase Admin</h2>
+            </div>
+
+            <div id="message-container" class="mb-4 hidden">
+                <div id="message-text" class="p-3 rounded-md text-sm"></div>
+            </div>
+
+            <form id="login-form" class="space-y-4">
+                <div class="space-y-2">
+                    <label for="email" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
+                    <input type="email" id="email" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                </div>
+                <div class="space-y-2">
+                    <label for="password" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Password</label>
+                    <input type="password" id="password" required class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                </div>
+
+                <input type="hidden" id="token" value="<?php echo $data['csrf_token']; ?>" />
+
+                <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
+                    Sign in
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+    <script>
+        const messageContainer = document.getElementById('message-container');
+        const messageText = document.getElementById('message-text');
+        function showMessage(message, isSuccess) {
+            messageText.textContent = message;
+            messageText.className = `p-3 rounded-md text-sm ${isSuccess ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-destructive/10 text-destructive'}`;
+            messageContainer.classList.remove('hidden');
+            setTimeout(() => {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const endpoint = '/admin/login';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({email, password}),
+                });
+
+                const result = await response.json();
+                console.log("xxx:"+response.ok)
+                if (response.ok) {
+                    showMessage('Successfully logged in!', true);
+                    location.href = '/admin/dashboard'
+                } else {
+                    showMessage(result.data.message || 'An error occurred.', false);
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', false);
+            }
+        }
+    </script>
+<?php echo $data['footer']; ?>

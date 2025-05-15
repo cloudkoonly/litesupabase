@@ -1,0 +1,164 @@
+<style>
+    aside {
+        height: auto!important;
+    }
+    #user-profile-sidebar {
+        position: fixed;
+        bottom: 0;
+    }
+</style>
+<!-- Sidebar Toggle Button (Mobile) -->
+<button id="sidebar-toggle-mobile" class="md:hidden fixed bottom-4 right-4 z-20 bg-primary text-primary-foreground rounded-full p-3 shadow-lg">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar Toggle Button (Desktop) - Outside the sidebar -->
+<div id="sidebar-toggle-wrapper" class="hidden md:block fixed left-64 bottom-10 z-50 transition-all duration-300 ease-in-out">
+    <button id="sidebar-toggle" class="flex items-center justify-center w-8 h-16 bg-card hover:bg-accent/50 text-muted-foreground hover:text-foreground border border-border rounded-r-md transition-colors duration-200 shadow-lg">
+        <i class="fas fa-chevron-left text-base"></i>
+    </button>
+</div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="w-full md:w-64 bg-card border-r border-border md:h-[calc(100vh-57px)] transition-all duration-300 ease-in-out overflow-hidden">
+    <div class="flex flex-col h-full">
+
+        <!-- Navigation -->
+        <nav class="p-2 flex-grow">
+            <ul class="space-y-1">
+                <li>
+                    <a href="/admin/dashboard" class="nav-link w-full flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent/80 <?php if ($uri=='/admin/dashboard') echo 'bg-accent text-accent-foreground'; ?>">
+                        <i class="fas fa-tachometer-alt h-5"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/auth" class="nav-link w-full flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground <?php if ($uri=='/admin/auth') echo 'bg-accent text-accent-foreground'; ?>">
+                        <i class="fas fa-lock h-5"></i>
+                        <span class="sidebar-text">Authentication</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/storage" class="nav-link w-full flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground <?php if ($uri=='/admin/storage') echo 'bg-accent text-accent-foreground'; ?>">
+                        <i class="fas fa-folder h-5"></i>
+                        <span class="sidebar-text">Storage</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/db" class="nav-link w-full flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground <?php if ($uri=='/admin/db') echo 'bg-accent text-accent-foreground'; ?>">
+                        <i class="fas fa-database h-5"></i>
+                        <span class="sidebar-text">Database</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/api-document" class="nav-link w-full flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground  <?php if ($uri=='/admin/api-document') echo 'bg-accent text-accent-foreground'; ?>">
+                        <i class="fas fa-file h-5"></i>
+                        <span class="sidebar-text">Api Document</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- User Profile Section at Bottom -->
+        <div id="user-profile-sidebar" class="p-4 border-t border-border">
+            <div class="flex items-center space-x-3">
+                <div class="avatar-container bg-primary/10 rounded-full h-10 w-10 flex items-center justify-center text-primary">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="sidebar-text overflow-hidden">
+                    <div id="sidebar-user-email" class="text-sm font-medium truncate"><?php echo $email; ?></div>
+                    <div class="text-xs text-muted-foreground">Lite Supabase</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+<script>
+    // Sidebar Toggle Functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarToggleMobile = document.getElementById('sidebar-toggle-mobile');
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarTexts = document.querySelectorAll('.sidebar-text');
+    const userProfileSidebar = document.getElementById('user-profile-sidebar');
+
+    function toggleSidebar() {
+        const isCollapsed = sidebar.classList.contains('md:w-16');
+        const sidebarToggleWrapper = document.getElementById('sidebar-toggle-wrapper');
+
+        if (isCollapsed) {
+            // Expand
+            sidebar.classList.remove('md:w-16');
+            sidebar.classList.add('md:w-64');
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-left text-base"></i>';
+            sidebarTexts.forEach(text => text.classList.remove('hidden'));
+            sidebarToggleWrapper.style.left = '256px';
+            userProfileSidebar.classList.add('md:w-64');
+            userProfileSidebar.classList.remove('md:w-16');
+            localStorage.setItem('sidebarCollapsed', 'false');
+        } else {
+            // Collapse
+            sidebar.classList.remove('md:w-64');
+            sidebar.classList.add('md:w-16');
+            sidebarToggle.innerHTML = '<i class="fas fa-chevron-right text-base"></i>';
+            sidebarTexts.forEach(text => text.classList.add('hidden'));
+            sidebarToggleWrapper.style.left = '64px';
+            userProfileSidebar.classList.add('md:w-16');
+            userProfileSidebar.classList.remove('md:w-64');
+            localStorage.setItem('sidebarCollapsed', 'true');
+        }
+    }
+
+    function toggleMobileSidebar() {
+        sidebar.classList.toggle('-translate-x-full');
+    }
+
+    // Check if sidebar was collapsed previously
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+        sidebar.classList.remove('md:w-64');
+        sidebar.classList.add('md:w-16');
+        sidebarToggle.innerHTML = '<i class="fas fa-chevron-right text-base"></i>';
+        sidebarTexts.forEach(text => text.classList.add('hidden'));
+        document.getElementById('sidebar-toggle-wrapper').style.left = '64px';
+    }
+
+    // Add mobile sidebar class for small screens
+    if (window.innerWidth < 768) {
+        sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-30', '-translate-x-full');
+    }
+
+    // Event listeners for sidebar toggles
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarToggleMobile.addEventListener('click', toggleMobileSidebar);
+    mobileMenuToggle.addEventListener('click', toggleMobileSidebar);
+
+    // Add window resize listener to ensure button position is correct
+    window.addEventListener('resize', function () {
+        const isCollapsed = sidebar.classList.contains('md:w-16');
+        const sidebarToggleWrapper = document.getElementById('sidebar-toggle-wrapper');
+
+        if (window.innerWidth >= 768) { // md breakpoint
+            if (isCollapsed) {
+                sidebarToggleWrapper.style.left = '64px';
+            } else {
+                sidebarToggleWrapper.style.left = '256px';
+            }
+        }
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function () {
+            // Update active link
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-accent', 'text-accent-foreground');
+            });
+            this.classList.add('bg-accent', 'text-accent-foreground');
+
+            // Close mobile sidebar after navigation
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+    });
+</script>

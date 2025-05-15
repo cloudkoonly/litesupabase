@@ -1,0 +1,39 @@
+<?php echo $data['header']; ?>
+    <body class="min-h-screen">
+<div id="dashboard-screen" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <?php echo $data['top']; ?>
+
+    <div class="flex-1 flex flex-col md:flex-row relative">
+        <?php echo $data['aside']; ?>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 md:p-6 overflow-auto relative">
+            <?php echo $data['main']; ?>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Window resize handler for responsive sidebar
+    window.addEventListener('resize', function () {
+        if (window.innerWidth < 768) {
+            sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-30');
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        } else {
+            sidebar.classList.remove('fixed', 'inset-y-0', 'left-0', 'z-30', '-translate-x-full');
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if dark mode is enabled
+        if (localStorage.getItem('darkMode') === 'true' ||
+            (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches &&
+                localStorage.getItem('darkMode') !== 'false')) {
+            document.documentElement.classList.add('dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+    });
+</script>
+<?php echo $data['footer']; ?>

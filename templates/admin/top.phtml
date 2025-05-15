@@ -1,0 +1,192 @@
+<!-- Header -->
+<header class="bg-card border-b border-border sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <button id="mobile-menu-toggle" class="md:hidden p-2 rounded-md hover:bg-accent">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="text-xl font-bold text-primary">Lite Supabase</h1>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <div class="relative">
+                <button id="notifications-toggle" class="p-2 rounded-md hover:bg-accent">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div id="notification-indicator" class="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full"></div>
+                <!-- Notifications Dropdown -->
+                <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-card rounded-md shadow-lg border border-border z-50">
+                    <div class="p-3 border-b border-border flex items-center justify-between">
+                        <h3 class="font-medium">Notifications</h3>
+                        <button id="mark-all-read" class="text-xs text-primary hover:underline">Mark all as read</button>
+                    </div>
+                    <div id="notifications-list" class="max-h-64 overflow-y-auto">
+                        <div class="p-4 text-center text-muted-foreground text-sm">No notifications</div>
+                    </div>
+                </div>
+            </div>
+            <span id="user-email" class="text-sm text-muted-foreground hidden md:inline-block"></span>
+            <button id="theme-toggle" class="p-2 rounded-md hover:bg-accent">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a href="/admin/logout" id="logout-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+            </a>
+        </div>
+    </div>
+</header>
+<div id="message-container" class="fixed bottom-6 right-6 z-[9999] transition-all duration-300 transform translate-x-full opacity-0">
+    <div id="message-text" class="p-4 rounded-lg text-sm shadow-xl border border-border/50 backdrop-blur-sm min-w-[280px] max-w-[400px] font-medium"></div>
+</div>
+<script>
+    const logoutBtn = document.getElementById('logout-btn');
+    const themeToggle = document.getElementById('theme-toggle');
+    // Theme toggle
+    themeToggle.addEventListener('click', function () {
+        document.documentElement.classList.toggle('dark');
+        const isDark = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', isDark);
+        themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // Notifications functionality
+    const notificationsToggle = document.getElementById('notifications-toggle');
+    const notificationsDropdown = document.getElementById('notifications-dropdown');
+    const notificationIndicator = document.getElementById('notification-indicator');
+    const notificationsList = document.getElementById('notifications-list');
+    const markAllReadBtn = document.getElementById('mark-all-read');
+
+    let notifications = [];
+
+    // Toggle notifications dropdown
+    notificationsToggle.addEventListener('click', () => {
+        notificationsDropdown.classList.toggle('hidden');
+
+        // Mark notifications as seen when dropdown is opened
+        if (!notificationsDropdown.classList.contains('hidden')) {
+            notificationIndicator.classList.add('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!notificationsToggle.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        }, {once: true});
+    });
+
+    // Mark all notifications as read
+    markAllReadBtn.addEventListener('click', () => {
+        notifications = notifications.map(notification => ({
+            ...notification,
+            read: true
+        }));
+
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        renderNotifications();
+        notificationIndicator.classList.add('hidden');
+    });
+
+    // Add notification
+    function addNotification(title, message, type = 'info') {
+        const notification = {
+            id: Date.now(),
+            title,
+            message,
+            type,
+            read: false,
+            timestamp: new Date().toISOString()
+        };
+
+        notifications.unshift(notification);
+
+        // Limit to 10 notifications
+        if (notifications.length > 10) {
+            notifications.pop();
+        }
+
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        renderNotifications();
+        notificationIndicator.classList.remove('hidden');
+    }
+
+    // Render notifications
+    function renderNotifications() {
+        if (notifications.length === 0) {
+            notificationsList.innerHTML = '<div class="p-4 text-center text-muted-foreground text-sm">No notifications</div>';
+            return;
+        }
+
+        notificationsList.innerHTML = '';
+
+        notifications.forEach(notification => {
+            const date = new Date(notification.timestamp);
+            const formattedDate = date.toLocaleString();
+
+            const notificationEl = document.createElement('div');
+            notificationEl.className = `p-3 border-b border-border ${notification.read ? 'bg-background' : 'bg-accent/20'}`;
+
+            let iconClass = 'fa-info-circle text-primary';
+            if (notification.type === 'success') {
+                iconClass = 'fa-check-circle text-green-500';
+            } else if (notification.type === 'error') {
+                iconClass = 'fa-exclamation-circle text-destructive';
+            } else if (notification.type === 'warning') {
+                iconClass = 'fa-exclamation-triangle text-amber-500';
+            }
+
+            notificationEl.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <i class="fas ${iconClass}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-medium">${notification.title}</div>
+                                <div class="text-sm text-muted-foreground">${notification.message}</div>
+                                <div class="text-xs text-muted-foreground mt-1">${formattedDate}</div>
+                            </div>
+                            <button class="delete-notification ml-2 text-muted-foreground hover:text-destructive" data-id="${notification.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+
+            notificationsList.appendChild(notificationEl);
+        });
+
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-notification').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.dataset.id);
+                notifications = notifications.filter(notification => notification.id !== id);
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                renderNotifications();
+
+                // Update notification indicator
+                const unreadNotifications = notifications.filter(notification => !notification.read);
+                if (unreadNotifications.length === 0) {
+                    notificationIndicator.classList.add('hidden');
+                }
+
+                e.stopPropagation();
+            });
+        });
+
+        // Check if there are any unread notifications
+        const unreadNotifications = notifications.filter(notification => !notification.read);
+        if (unreadNotifications.length > 0) {
+            notificationIndicator.classList.remove('hidden');
+        } else {
+            notificationIndicator.classList.add('hidden');
+        }
+    }
+
+    // Load notifications from localStorage
+    function loadNotifications() {
+        const storedNotifications = localStorage.getItem('notifications');
+        if (storedNotifications) {
+            notifications = JSON.parse(storedNotifications);
+            renderNotifications();
+        }
+    }
+</script>

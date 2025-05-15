@@ -1,0 +1,176 @@
+<!-- Storage Section -->
+<section id="storage-section" class="dashboard-section space-y-6">
+    <!-- Header with Storage Admin Link -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-bold tracking-tight">Storage</h2>
+            <p class="text-muted-foreground mt-1">Manage your files and storage buckets</p>
+        </div>
+        <a target="_blank" href="/storage/index.php?token=<?php echo $ssoToken; ?>" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            <i class="fas fa-file mr-2"></i> Storage Admin
+        </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <a target="_blank" href="/storage/index.php?p=&upload&token=<?php echo $ssoToken; ?>" class="block bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-medium">Upload Files</h3>
+                    <p class="text-sm text-muted-foreground">Add new files to storage</p>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-upload text-xl"></i>
+                </div>
+            </div>
+        </a>
+        <a target="_blank" href="/storage/index.php?p=html&token=<?php echo $ssoToken; ?>" class="block bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow cursor-pointer" id="create-bucket-btn">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-medium">Static Assets</h3>
+                    <p class="text-sm text-muted-foreground">Manage website static files</p>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-file-code text-xl"></i>
+                </div>
+            </div>
+        </a>
+        <a target="_blank" href="/storage/index.php?p=preferences&token=<?php echo $ssoToken; ?>" class="block bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-medium">Storage Settings</h3>
+                    <p class="text-sm text-muted-foreground">Configure storage options</p>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-cog text-xl"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Storage Overview -->
+    <div class="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-border flex items-center justify-between">
+            <h3 class="font-medium">Storage Overview</h3>
+            <button id="refresh-storage" class="inline-flex items-center justify-center h-9 px-3 text-sm rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                <i class="fas fa-sync-alt mr-2"></i> Refresh
+            </button>
+        </div>
+        
+        <!-- Storage Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+            <!-- Storage Usage -->
+            <div class="bg-background rounded-lg border border-border p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium">Storage Usage</h4>
+                    <div class="text-primary">
+                        <i class="fas fa-database"></i>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-muted-foreground">Storage Usage</span>
+                            <span class="font-medium">
+                                <span id="storage-used">-</span> / <span id="storage-quota">-</span>
+                            </span>
+                        </div>
+                        <div class="bg-muted rounded-full h-2">
+                            <div id="storage-bar" class="bg-primary rounded-full h-2 transition-all" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1">
+                            <span class="text-muted-foreground">Total Files:</span>
+                            <span id="total-files">-</span>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1">
+                            <span class="text-muted-foreground">Usage:</span>
+                            <span><span id="storage-percent">0</span>%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Types Distribution -->
+            <div class="bg-background rounded-lg border border-border p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium">File Types</h4>
+                    <div class="text-primary">
+                        <i class="fas fa-file"></i>
+                    </div>
+                </div>
+                <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar" id="file-types-list">
+                    <!-- File types will be populated here -->
+                    <div class="animate-pulse">
+                        <div class="h-2 bg-muted rounded w-full mb-2"></div>
+                        <div class="h-2 bg-muted rounded w-3/4 mb-2"></div>
+                        <div class="h-2 bg-muted rounded w-1/2"></div>
+                    </div>
+                </div>
+
+                <style>
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: hsl(var(--muted));
+                    border-radius: 3px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: hsl(var(--muted-foreground));
+                    border-radius: 3px;
+                }
+                </style>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function loadStorageInfo() {
+        try {
+            const response = await fetch('/admin/storage/info');
+            if (!response.ok) throw new Error('Failed to fetch storage information');
+            const result = await response.json();
+            const data = result.data;
+            // Update storage usage
+            document.getElementById('storage-used').textContent = formatBytes(data.used_space);
+            document.getElementById('storage-quota').textContent = formatBytes(data.quota);
+            document.getElementById('storage-bar').style.width = `${data.usage_percent}%`;
+            document.getElementById('storage-percent').textContent = data.usage_percent;
+            document.getElementById('total-files').textContent = data.total_files;
+
+            // Update file types distribution
+            const fileTypesList = document.getElementById('file-types-list');
+            if (data.file_types && data.file_types.length > 0) {
+                fileTypesList.innerHTML = data.file_types.map(type => `
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-muted-foreground">${type.extension}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs">${type.count} files</span>
+                            <span class="text-xs text-muted-foreground">${formatBytes(type.size)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                fileTypesList.innerHTML = '<div class="text-center text-muted-foreground">No files found</div>';
+            }
+        } catch (error) {
+            console.error('Error loading storage info:', error);
+            showMessage('Failed to load storage information', 'error');
+        }
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Initialize refresh button
+    document.getElementById('refresh-storage').addEventListener('click', loadStorageInfo);
+
+    // Load initial data
+    loadStorageInfo();
+    </script>
+</section>
