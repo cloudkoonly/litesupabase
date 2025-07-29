@@ -6,6 +6,10 @@
 [![MySQL Version](https://img.shields.io/badge/MySQL-%3E%3D5.7-blue.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
+## ✨ Preview
+
+![](https://cdn2.koonly.com/images/2025-05-20/litesupabase-20250520-151449_450.webp)
+
 ## ✨ Features
 
 - **User Authentication**
