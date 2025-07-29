@@ -240,6 +240,79 @@ class AdminController extends Base
         }
     }
 
+    public function authSetting(Request $request, Response $response): Response
+    {
+        $envPath = $this->settings['root'] . '.env';
+
+        if ($request->getMethod() === 'POST') {
+            $json = $request->getBody();
+            $data = json_decode((string)$json, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $this->respondWithJson($response, 400, 'Invalid JSON provided.');
+            }
+
+            try {
+                $this->updateEnvFile($envPath, $data);
+                return $this->respondWithJson($response, 200, 'Settings updated successfully.');
+            } catch (Exception $e) {
+                return $this->respondWithJson($response, 500, 'Failed to update settings: ' . $e->getMessage());
+            }
+        }
+
+        // Handle GET request
+        try {
+            if (!is_readable($envPath)) {
+                throw new Exception('.env file not found or not readable.');
+            }
+
+            $envContent = file_get_contents($envPath);
+            $settings = [];
+            $keys = [
+                'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URL',
+                'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET', 'GITHUB_REDIRECT_URL'
+            ];
+
+            foreach ($keys as $key) {
+                if (preg_match('/^' . $key . '=(.*)$/m', $envContent, $matches)) {
+                    $settings[$key] = trim($matches[1]);
+                } else {
+                    $settings[$key] = '';
+                }
+            }
+
+            return $this->respondWithJson($response, 200, 'ok', ['settings' => $settings]);
+        } catch (Exception $e) {
+            return $this->respondWithJson($response, 500, 'Failed to read settings: ' . $e->getMessage());
+        }
+    }
+
+    private function updateEnvFile(string $envPath, array $newValues): void
+    {
+        if (!is_writable($envPath)) {
+            throw new Exception('.env file is not writable.');
+        }
+
+        $content = file_get_contents($envPath);
+
+        foreach ($newValues as $key => $value) {
+            $key = strtoupper($key);
+            $value = trim($value);
+            // Escape special characters for regex
+            $escapedValue = str_replace(['$', '\"'], ['\$', '\\\"'], $value);
+
+            if (preg_match('/^' . $key . '=(.*)$/m', $content)) {
+                // Update existing key
+                $content = preg_replace('/^' . $key . '=(.*)$/m', $key . '=' . $escapedValue, $content);
+            } else {
+                // Add new key
+                $content .= "\n" . $key . '=' . $escapedValue;
+            }
+        }
+
+        file_put_contents($envPath, $content);
+    }
+
     public function api(Request $request, Response $response):Response
     {
         $data = $this->initAdminData($request);
@@ -289,24 +362,6 @@ class AdminController extends Base
         return $this->phpRenderer->fetch('admin/footer.phtml');
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
-    public function generateToken(): string
-    {
-        $rawToken = bin2hex(random_bytes(32)); // 64-character random string
-        $token = hash('sha256', $rawToken);
-        return $token;
-    }
-
-    private function writeSsoToken():void
-    {
-        $tokenFile = $this->settings['sso_token.file'];
-        $token = $this->session['sso_token']??'';
-        $expire = time() + 86400;
-        file_put_contents($tokenFile, json_encode(['token'=>$token,'expire'=>$expire],JSON_PRETTY_PRINT));
-    }
     private function rmSsoToken():void
     {
         $tokenFile = $this->settings['sso_token.file'];

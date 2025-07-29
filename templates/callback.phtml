@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Auth Callback</title>
+    <style>
+        .auth-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .auth-loader {
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .loader-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1.5rem;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4285F4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1.5rem;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #EA4335;
+            border-radius: 50%;
+            animation: none;
+        }
+
+        .loader-text {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .loader-subtext {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .auth-overlay {
+                background: rgba(0, 0, 0, 0.9);
+            }
+            .auth-loader {
+                background: #1e1e1e;
+            }
+            .loader-text {
+                color: #f0f0f0;
+            }
+            .loader-subtext {
+                color: #aaa;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-loader">
+        <div class="loader-spinner" id="loaderSpinner"></div>
+        <div class="loader-text" id="loaderText">Initializing authentication</div>
+        <div class="loader-subtext" id="loaderSubtext">Please wait while we process your request</div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authCode = urlParams.get('code');
+        const loaderText = document.getElementById('loaderText');
+        const loaderSubtext = document.getElementById('loaderSubtext');
+        const spinner = document.getElementById('loaderSpinner');
+
+        if (!authCode) {
+            // No auth code found
+            spinner.className = 'error-spinner';
+            loaderText.textContent = 'Authentication Error';
+            loaderSubtext.textContent = 'Required authorization code is missing';
+            return;
+        }
+
+        // Proceed with authentication
+        loaderText.textContent = 'Authenticating';
+        loaderSubtext.textContent = 'Please wait while we verify your credentials';
+        const url = "/admin/<?php echo $vendor; ?>/callback";
+        const csrfToken = "<?php echo $csrfToken; ?>";
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ code: authCode, csrf_token: csrfToken })
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Authentication failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.code === 200) {
+                    loaderText.textContent = 'Authentication Successful';
+                    loaderSubtext.textContent = 'Redirecting to your account...';
+
+                    // Store tokens and user data
+                    localStorage.setItem('access_token', data.data.access_token);
+                    localStorage.setItem('refresh_token', data.data.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Authentication error');
+                }
+            })
+            .catch(error => {
+                console.error('Authentication Error:', error);
+                spinner.className = 'error-spinner';
+                loaderText.textContent = 'Authentication Failed';
+                loaderSubtext.textContent = error.message || 'Please try again later';
+            });
+    });
+</script>
+</body>
+</html>

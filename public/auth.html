@@ -121,8 +121,10 @@
         fetch('/api/auth/config')
             .then(response => response.json())
             .then(config => {
-                window.GOOGLE_CLIENT_ID = config.googleClientId;
-                window.GITHUB_CLIENT_ID = config.githubClientId;
+                window.GOOGLE_CLIENT_ID = config.data.googleClientId;
+                window.GITHUB_CLIENT_ID = config.data.githubClientId;
+                window.GOOGLE_REDIRECT_URI = config.data.googleRedirect;
+                window.GITHUB_REDIRECT_URI = config.data.githubRedirect;
             })
             .catch(error => {
                 console.error('Failed to load OAuth configuration:', error);
@@ -138,23 +140,19 @@
         const toggleLink = document.querySelector('a[onclick="toggleMode()"]');
 
         const TokenManager = {
-            // 存储Token
             setTokens: (accessToken, refreshToken) => {
                 localStorage.setItem('access_token', accessToken);
                 localStorage.setItem('refresh_token', refreshToken);
             },
 
-            // 获取Token
             getAccessToken: () => localStorage.getItem('access_token'),
             getRefreshToken: () => localStorage.getItem('refresh_token'),
 
-            // 清除Token
             clearTokens: () => {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
             },
 
-            // 检查Token是否过期
             isTokenExpired: (token) => {
                 if (!token) return true;
                 try {
@@ -227,7 +225,6 @@
                 }
             }
 
-            // 封装常用HTTP方法
             async get(url, options) {
                 return this.request(url, { ...options, method: 'GET' });
             }
@@ -243,8 +240,6 @@
                     }
                 });
             }
-
-            // 类似实现put, patch, delete等方法
         }
         window.authFetch = new AuthFetch();
 
@@ -281,11 +276,12 @@
             const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
             const params = new URLSearchParams({
                 client_id: window.GOOGLE_CLIENT_ID,
-                redirect_uri: window.location.origin + '/api/auth/google/callback',
+                redirect_uri: window.GOOGLE_REDIRECT_URI,
                 response_type: 'code',
+                access_type: 'online',
                 scope: 'email profile',
                 state: state,
-                prompt: 'select_account'
+                approval_prompt: 'auto'
             });
 
             // Redirect to Google login
@@ -301,7 +297,7 @@
             const githubAuthUrl = 'https://github.com/login/oauth/authorize';
             const params = new URLSearchParams({
                 client_id: window.GITHUB_CLIENT_ID,
-                redirect_uri: window.location.origin + '/api/auth/github/callback',
+                redirect_uri: window.GITHUB_REDIRECT_URI,
                 scope: 'user:email',
                 state: state
             });
@@ -309,45 +305,6 @@
             // Redirect to GitHub login
             window.location.href = `${githubAuthUrl}?${params.toString()}`;
         }
-
-        // Handle OAuth callback
-        function handleOAuthCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-            const storedState = localStorage.getItem('oauthState');
-            const provider = urlParams.get('provider');
-        
-            if (code && state && state === storedState) {
-                // Clear stored state
-                localStorage.removeItem('oauthState');
-        
-                // Exchange code for token
-                fetch(`/api/auth/${provider}/callback?code=${code}&state=${state}`)
-                    .then(response => response.json())
-                    .then(result => {
-                        if (response.ok) {
-                            showMessage('Successfully logged in!', true);
-                            TokenManager.setTokens(result.data.access_token, result.data.refresh_token);
-                            //window.location.href = '/dashboard';
-                        } else {
-                            showMessage(result.data.message || 'An error occurred.', false);
-                        }
-                    })
-                    .catch(error => {
-                        showMessage('An error occurred during authentication.', false);
-                    });
-            } else {
-                showMessage('Invalid authentication state.', false);
-            }
-        }
-
-        // Check for OAuth callback on page load
-        window.addEventListener('load', () => {
-            if (window.location.search.includes('code=')) {
-                handleOAuthCallback();
-            }
-        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -382,16 +339,6 @@
                 }
             } catch (error) {
                 showMessage('An error occurred. Please try again.', false);
-            }
-        });
-
-        // logout
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            try {
-                await authFetch.post('/api/auth/logout');
-            } finally {
-                TokenManager.clearTokens();
-                window.location.href = '/auth.html';
             }
         });
 

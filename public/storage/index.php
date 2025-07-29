@@ -336,8 +336,6 @@ function getValidToken(): string
     $tokenFile = __DIR__.'/../../var/cache/sso_token.json';
     if (!file_exists($tokenFile)) return '';
     $tokenData = json_decode(file_get_contents($tokenFile), true);
-    $expire = $tokenData['expire']??0;
-    if ($expire-time()<=0) return '';
     return $tokenData['token']??'';
 }
 // Checking if the user is logged in or not. If not, it will show the login form.

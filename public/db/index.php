@@ -1,26 +1,35 @@
 <?php
 
+use Dotenv\Dotenv;
 use function Adminer\encrypt_string;
+
+$root = __DIR__.'/../../';
+require $root . 'vendor/autoload.php';
+if (!file_exists($root. '.env')) {
+    echo ".env file not found";exit;
+}
+$dotEnv = Dotenv::createImmutable($root);
+$dotEnv->load();
 
 include_once __DIR__ . '/xxtea.inc.php';
 session_name('adminer_sid');
 session_start();
-$redirect = '/db/adminer.php';
+$index = '/db/adminer.php';
 $vendor = 'server';
-$server = 'mysql8';
-$username = 'root';
-$password = '123456';
-$db = '';
+$server = $_ENV['DB_HOST']??'mysql';
+$username = $_ENV['DB_USER']??'';
+$password = $_ENV['DB_PASS']??'';
+$db = $_ENV['DB_NAME']??'';
 if (isset($_GET['token'])) {
     $validToken = getValidToken();
     if ($_GET['token'] === $validToken) {
         session_regenerate_id(); // defense against session fixation
         set_password($vendor, $server, $username, $password);
         $_SESSION["db"][$vendor][$server][$username][$db] = true;
-        $redirect = $redirect.'?server=mysql8&username=root';
-        if (isset($_GET['db'])) $redirect = $redirect.'?server=mysql8&username=root&db='.$_GET['db'];
-        if (isset($_GET['sql'])) $redirect = $redirect.'?server=mysql8&username=root&sql=';
-        if (isset($_GET['dump'])) $redirect = $redirect.'?server=mysql8&username=root&dump=';
+        $redirect = $index.'?server='.$server.'&username='.$username;
+        if (isset($_GET['db'])) $redirect = $index.'?server='.$server.'&username='.$username.'&db='.$_GET['db'];
+        if (isset($_GET['sql'])) $redirect = $index.'?server='.$server.'&username='.$username.'&sql=';
+        if (isset($_GET['dump'])) $redirect = $index.'?server='.$server.'&username='.$username.'&dump=';
     } else {
         logout($vendor,$server,$username);
     }

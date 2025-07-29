@@ -1,4 +1,14 @@
 <!-- Authentication Section -->
+<style>
+    /* Hide browser-default password reveal icon */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+    input[type="password"]::-webkit-reveal {
+        display: none;
+    }
+</style>
 <section id="auth-section" class="dashboard-section space-y-6">
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
         <h2 class="text-2xl font-bold tracking-tight">Authentication</h2>
@@ -8,6 +18,9 @@
             </a>
             <button id="refresh-users" class="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-3">
                 <i class="fas fa-sync-alt mr-2"></i> <span>Refresh</span>
+            </button>
+            <button id="setting-btn" class="flex-1 sm:flex-initial inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-3">
+                <i class="fas fa-cog mr-2"></i> Setting
             </button>
         </div>
     </div>
@@ -86,6 +99,72 @@
         </div>
     </div>
 </section>
+
+<!-- Setting Modal -->
+<div id="setting-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-card rounded-lg shadow-lg w-full max-w-lg p-6 space-y-4 transform transition-all scale-95 opacity-0">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-medium">Authentication Settings</h3>
+            <button id="setting-close-btn" class="text-muted-foreground hover:text-foreground">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="setting-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2 col-span-2">
+                    <h4 class="font-medium text-primary">Google</h4>
+                </div>
+                <div class="space-y-2">
+                    <label for="google-client-id" class="text-sm font-medium">Client ID</label>
+                    <input type="text" id="google-client-id" name="google_client_id" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                </div>
+                <div class="space-y-2">
+                    <label for="google-client-secret" class="text-sm font-medium">Client Secret</label>
+                    <div class="relative">
+                        <input type="password" id="google-client-secret" name="google_client_secret" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10">
+                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground" onclick="togglePasswordVisibility('google-client-secret')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-2 col-span-2">
+                    <label for="google-redirect-url" class="text-sm font-medium">Redirect URL</label>
+                    <input type="text" id="google-redirect-url" name="google_redirect_url" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                </div>
+
+                <div class="space-y-2 col-span-2 border-t pt-4">
+                    <h4 class="font-medium text-primary">GitHub</h4>
+                </div>
+                <div class="space-y-2">
+                    <label for="github-client-id" class="text-sm font-medium">Client ID</label>
+                    <input type="text" id="github-client-id" name="github_client_id" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                </div>
+                <div class="space-y-2">
+                    <label for="github-client-secret" class="text-sm font-medium">Client Secret</label>
+                    <div class="relative">
+                        <input type="password" id="github-client-secret" name="github_client_secret" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10">
+                        <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground" onclick="togglePasswordVisibility('github-client-secret')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-2 col-span-2">
+                    <label for="github-redirect-url" class="text-sm font-medium">Redirect URL</label>
+                    <input type="text" id="github-redirect-url" name="github_redirect_url" class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-4">
+                <button type="button" id="setting-cancel-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                    Cancel
+                </button>
+                <button type="submit" id="setting-save-btn" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <i class="fas fa-save mr-2"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Edit User Modal -->
 <div id="edit-user-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
@@ -425,5 +504,109 @@
                 showMessage(`Error deleting user: ${error.message}`, 'error');
             }
         }
+    }
+
+    // --- Settings Modal Logic ---
+    const settingBtn = document.getElementById('setting-btn');
+    const settingModal = document.getElementById('setting-modal');
+    const settingModalContent = settingModal.querySelector('.transform');
+    const settingCloseBtn = document.getElementById('setting-close-btn');
+    const settingCancelBtn = document.getElementById('setting-cancel-btn');
+    const settingForm = document.getElementById('setting-form');
+    const settingSaveBtn = document.getElementById('setting-save-btn');
+
+    function openSettingModal() {
+        settingModal.classList.remove('hidden');
+        settingModal.classList.add('flex');
+        setTimeout(() => {
+            if(settingModalContent) {
+                settingModalContent.classList.remove('scale-95', 'opacity-0');
+            }
+        }, 10);
+
+        // Fetch current settings
+        fetch('/admin/auth/setting')
+            .then(response => response.json())
+            .then(data => {
+                if (data.code===200) {
+                    document.getElementById('google-client-id').value = data.data.settings.GOOGLE_CLIENT_ID || '';
+                    document.getElementById('google-client-secret').value = data.data.settings.GOOGLE_CLIENT_SECRET || '';
+                    document.getElementById('google-redirect-url').value = data.data.settings.GOOGLE_REDIRECT_URL || '';
+                    document.getElementById('github-client-id').value = data.data.settings.GITHUB_CLIENT_ID || '';
+                    document.getElementById('github-client-secret').value = data.data.settings.GITHUB_CLIENT_SECRET || '';
+                    document.getElementById('github-redirect-url').value = data.data.settings.GITHUB_REDIRECT_URL || '';
+                } else {
+                    showMessage('Error fetching settings: ' + data.message, 'error');
+                }
+            })
+            .catch(err => {
+                showMessage('Error fetching settings.', 'error');
+                console.error(err);
+            });
+    }
+
+    function closeSettingModal() {
+        if(settingModalContent) {
+            settingModalContent.classList.add('scale-95', 'opacity-0');
+        }
+        setTimeout(() => {
+            settingModal.classList.add('hidden');
+            settingModal.classList.remove('flex');
+        }, 300);
+    }
+
+    if(settingBtn) settingBtn.addEventListener('click', openSettingModal);
+    if(settingCloseBtn) settingCloseBtn.addEventListener('click', closeSettingModal);
+    if(settingCancelBtn) settingCancelBtn.addEventListener('click', closeSettingModal);
+
+    window.togglePasswordVisibility = function(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = input.nextElementSibling.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    if(settingForm) {
+        settingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(settingForm);
+            const data = Object.fromEntries(formData.entries());
+
+            const originalBtnHtml = settingSaveBtn.innerHTML;
+            settingSaveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Saving...`;
+            settingSaveBtn.disabled = true;
+
+            fetch('/admin/auth/setting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.code===200) {
+                    showMessage('Settings saved successfully!', 'success');
+                    closeSettingModal();
+                } else {
+                    showMessage('Error saving settings: ' + result.message, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage('An unexpected error occurred.', 'error');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                settingSaveBtn.innerHTML = originalBtnHtml;
+                settingSaveBtn.disabled = false;
+            });
+        });
     }
 </script>

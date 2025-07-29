@@ -53,4 +53,22 @@ abstract class Base
     {
         return $this->session->exists('email');
     }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function generateToken(): string
+    {
+        $rawToken = bin2hex(random_bytes(32)); // 64-character random string
+        return hash('sha256', $rawToken);
+    }
+
+    public function writeSsoToken():void
+    {
+        $tokenFile = $this->settings['sso_token.file'];
+        $token = $this->session['sso_token']??'';
+        $expire = time() + 86400;
+        file_put_contents($tokenFile, json_encode(['token'=>$token,'expire'=>$expire],JSON_PRETTY_PRINT));
+    }
 }

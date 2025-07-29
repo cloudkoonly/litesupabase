@@ -38,8 +38,10 @@ class GoogleAuth
         if ($code) {
             $client = $this->getClient();
             $token = $client->fetchAccessTokenWithAuthCode($code);
-            $client->setAccessToken($token['access_token']);
+            $accessToken = $token['access_token']??'';
+            if (empty($accessToken)) return ['','','','',''];
 
+            $client->setAccessToken($accessToken);
             $google_oauth = new Google_Service_Oauth2($client);
             $google_account_info = $google_oauth->userinfo->get();
             //email,name,gender,picture(pic url)

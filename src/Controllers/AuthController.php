@@ -105,6 +105,8 @@ class AuthController extends Base
         $config = [
             'googleClientId' => $this->settings['GOOGLE_CLIENT_ID'],
             'githubClientId' => $this->settings['GITHUB_CLIENT_ID'],
+            'googleRedirect' => $this->settings['GOOGLE_REDIRECT_URI'],
+            'githubRedirect' => $this->settings['GITHUB_REDIRECT_URI'],
         ];
         return $this->respondWithJson($response, 200, "ok", $config);
     }
@@ -169,12 +171,14 @@ class AuthController extends Base
      */
     public function googleCallback(Request $request, Response $response): Response
     {
-        $clientID = $_ENV['googleClientID']??'';
-        $clientSecret =$_ENV['googleClientSecret']??'';
-        $redirectUri = $_ENV['googleRedirectUri']??'';
-        $vars = $request->getQueryParams();
+        $clientID = $_ENV['GOOGLE_CLIENT_ID']??'';
+        $clientSecret =$_ENV['GOOGLE_CLIENT_SECRET']??'';
+        $redirectUri = $_ENV['GOOGLE_REDIRECT_URI']??'';
+        $json = $request->getBody();
+        $vars = json_decode($json, true);
         $code = $vars['code']??'';
-        if (empty($code)) {
+        $csrfToken = $vars['csrf_token']??'';
+        if (empty($code) || !$this->session->exists('csrf_token') || $csrfToken!==$this->session['csrf_token']) {
             $this->logger->warning("Google auth error");
             return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
         }
@@ -194,12 +198,14 @@ class AuthController extends Base
      */
     public function githubCallback(Request $request, Response $response): Response
     {
-        $clientID = $_ENV['githubClientID']??'';
-        $clientSecret = $_ENV['githubClientSecret']??'';
-        $redirectUri = $_ENV['githubRedirectUri']??'';
-        $vars = $request->getQueryParams();
+        $clientID = $_ENV['GITHUB_CLIENT_ID']??'';
+        $clientSecret = $_ENV['GITHUB_CLIENT_SECRET']??'';
+        $redirectUri = $_ENV['GITHUB_REDIRECT_URI']??'';
+        $json = $request->getBody();
+        $vars = json_decode($json, true);
         $code = $vars['code']??'';
-        if (empty($code)) {
+        $csrfToken = $vars['csrf_token']??'';
+        if (empty($code) || !$this->session->exists('csrf_token') || $csrfToken!==$this->session['csrf_token']) {
             $this->logger->warning("Github auth error");
             return $response->withHeader('Location', '/index.html?e=Github auth error')->withStatus(302);
         }
@@ -224,10 +230,10 @@ class AuthController extends Base
             $access_token = $data['access_token'];
             $user_url = "https://api.github.com/user";
             $headers = [
-                'Authorization: token ' . $access_token
+                'Authorization: Bearer ' . $access_token
             ];
             $curl->setHeaders($headers);
-            $curl->post($user_url);
+            $curl->get($user_url);
             $result2 = $curl->getRawResponse();
             $this->logger->info("Request github user api url:" . $url . ",headers:" . json_encode($headers) . ",body:" . json_encode($body) . ", Get subscriptionConfirm result serialization:" . $result2 . ", HTTP code:".$curl->getHttpStatusCode());
             $userData = json_decode($result2, true);
@@ -238,7 +244,7 @@ class AuthController extends Base
             $gender = $userData['gender']??'';
             $this->logger->info("github auth ok, email:".$email.",name:".$name.",gender:".$gender);
             if ($email) {
-                return $this->ReturnTokenUseEmailByLoginWithThird('github', $providerId, $email, $name, $result2, $response);
+                return $this->ReturnTokenUseEmailByLoginWithThird('github', $providerId, $email, $name, $userData, $response);
             }
         }
         return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
@@ -318,6 +324,7 @@ class AuthController extends Base
                 'metadata' => json_encode($meta),
                 'password' => password_hash($this->generateSecurePassword(), PASSWORD_DEFAULT),
             ];
+            $this->userRepository = new UserRepository($this->db);
             $userResult = $this->userRepository->create($userData);
             $this->logger->info("Login with google and created User:" . json_encode($userResult));
         }

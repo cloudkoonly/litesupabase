@@ -20,7 +20,8 @@
         "slim/php-view": "^3.3",
         "bryanjhv/slim-session": "^4.1",
         "ext-redis": "*",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-curl": "*"
     },
     "autoload": {
         "psr-4": {

@@ -1233,7 +1233,7 @@ indexAlgorithms(array$ti){return(preg_match('~^(MEMORY|NDB)$~',$ti["Engine"])?ar
 idf_escape($u){return"`".str_replace("`","``",$u)."`";}function
 table($u){return
 idf_escape($u);}function
-get_databases($hd){$J=get_session("dbs");if($J===null){$H="SELECT SCHEMA_NAME FROM information_schema.SCHEMATA ORDER BY SCHEMA_NAME";$J=($hd?slow_query($H):get_vals($H));restart_session();set_session("dbs",$J);stop_session();}return$J;}function
+get_databases($hd){$J=get_session("dbs");if($J===null){$H="SELECT SCHEMA_NAME FROM information_schema.SCHEMATA ORDER BY SCHEMA_NAME";$J=($hd?slow_query($H):get_vals($H));restart_session();set_session("dbs",$J);stop_session();}return array_diff($J, ['information_schema', 'mysql', 'performance_schema', 'sys']);}function
 limit($H,$Z,$z,$C=0,$Mh=" "){return" $H$Z".($z?$Mh."LIMIT $z".($C?" OFFSET $C":""):"");}function
 limit1($R,$H,$Z,$Mh="\n"){return
 limit($H,$Z,1,0,$Mh);}function

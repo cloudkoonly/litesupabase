@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use Litesupabase\Admin\AdminController;
 use Litesupabase\Admin\AdminMiddleware;
+use Litesupabase\Controllers\CallbackController;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use Litesupabase\Controllers\AuthController;
@@ -17,6 +18,8 @@ return function (App $app) {
         return $response->withHeader('Location', '/home.html')->withStatus(302);
     });
 
+    $app->get('/callback/{id}', [CallbackController::class, 'action'])->add(Session::class);
+
     $app->group('/admin', function (RouteCollectorProxy $group) {
         $group->get('[/]', function (Request $request, Response $response) {
             return $response->withHeader('Location', '/admin/login')->withStatus(302);
@@ -26,6 +29,7 @@ return function (App $app) {
         $group->get('/logout', [AdminController::class, 'logout']);
         $group->get('/dashboard', [AdminController::class, 'dashboard'])->add(AdminMiddleware::class);
         $group->get('/auth', [AdminController::class, 'auth'])->add(AdminMiddleware::class);
+        $group->any('/auth/setting', [AdminController::class, 'authSetting'])->add(AdminMiddleware::class);
         $group->get('/users', [AdminController::class, 'users'])->add(AdminMiddleware::class);
         $group->get('/user/{id}', [AdminController::class, 'getUser'])->add(AdminMiddleware::class);
         $group->put('/user/{id}', [AdminController::class, 'updateUser'])->add(AdminMiddleware::class);
@@ -34,6 +38,8 @@ return function (App $app) {
         $group->get('/storage', [AdminController::class, 'storage'])->add(AdminMiddleware::class);
         $group->get('/storage/info', [AdminController::class, 'storageInfo'])->add(AdminMiddleware::class);
         $group->get('/api-document', [AdminController::class, 'api'])->add(AdminMiddleware::class);
+        $group->post('/google/callback', [AuthController::class, 'googleCallback']);
+        $group->post('/github/callback', [AuthController::class, 'githubCallback']);
     })->add(Session::class);
 
     // API Routes
@@ -47,8 +53,6 @@ return function (App $app) {
             $group->post('/forgot', [AuthController::class, 'forgotPassword']);
             $group->get('/config', [AuthController::class, 'config']);
             $group->get('/user', [AuthController::class, 'getUser'])->add(AuthMiddleware::class);
-            $group->get('/google/callback', [AuthController::class, 'googleCallback']);
-            $group->get('/github/callback', [AuthController::class, 'githubCallback']);
         });
     });
 

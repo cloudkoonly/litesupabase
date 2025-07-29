@@ -1,139 +1,137 @@
 # LiteSupabase
 
-LiteSupabase is a lightweight alternative to Supabase for modern web applications. Build scalable applications with authentication, database, storage and Restful APIs.
+`LiteSupabase` is a lightweight, open-source alternative to Supabase, built with PHP and the Slim Framework. It aims to provide developers with a self-hostable, high-performance Backend-as-a-Service (BaaS) platform, including core features like authentication, database management, and file storage.
 
-[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.1-blue.svg)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.2-blue.svg)](https://php.net)
 [![MySQL Version](https://img.shields.io/badge/MySQL-%3E%3D5.7-blue.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+## ✨ Features
 
-- **Authentication**
-  - User signup and login
-  - JWT-based authentication
-  - OAuth support (Google, GitHub)
-  - Token refresh mechanism
-  - Password reset functionality
+- **User Authentication**
+  - Email and password registration/login.
+  - Stateless authentication using JWT (JSON Web Tokens).
+  - OAuth support for Google and GitHub.
+  - Access token refresh and password reset functionality.
+
+- **Admin Dashboard**
+  - An intuitive dashboard to manage users, databases, and storage.
+  - View and manage all registered users.
+  - Configure third-party authentication credentials.
+  - Provides API documentation and debugging tools.
 
 - **Database Management**
-  - Secure data access
-  - Admin dashboard interface
+  - Manage database tables directly from the admin panel.
 
 - **File Storage**
-  - File upload and download
-  - Storage management
+  - Functionality for file uploads, downloads, and management.
+  - (Note: Storage-related API endpoints are currently under development).
 
-- **Restful APIs**
-  - Restful api document 
+## 🚀 Quick Start
 
-## Requirements
-
-- PHP >= 8.1
+### Requirements
+- PHP >= 8.2
 - MySQL >= 5.7
 - Composer
 
-## Quick Start
+### Installation Steps
 
-1. Clone the repository:
-```bash
-git clone https://github.com/cloudkoonly/litesupabase.git
-cd litesupabase
-```
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/cloudkoonly/litesupabase.git
+    cd litesupabase
+    ```
 
-2. Install PHP dependencies:
-```bash
-composer install
-```
+2.  **Install Dependencies**
+    ```bash
+    composer install
+    ```
 
-3. Configure your environment:
-```bash
-cp .env.example .env
-# Edit .env with your database credentials and other settings
-```
+3.  **Configure Environment Variables**
+    Copy the example environment file and modify it for your setup.
+    ```bash
+    cp .env.example .env
+    ```
+    You will need to edit the following settings in your `.env` file:
+    - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+    - `JWT_SECRET` (a secure, random string)
+    - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (for Google login)
+    - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (for GitHub login)
 
-4. Set up the database:
-```bash
-# Connect to your MySQL server and create the database
-mysql -u your_username -p
-CREATE DATABASE litesupabase;
+4.  **Initialize the Database**
+    Log in to your MySQL server, create a database, and import the `db.sql` schema.
+    ```bash
+    # Log in to MySQL
+    mysql -u your_username -p
 
-# Import the database schema
-mysql -u your_username -p litesupabase < db.sql
-```
+    # Create the database
+    CREATE DATABASE litesupabase CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-5. Configure your web server (Apache/Nginx) to point to the `public` directory.
+    # Import the table schema
+    mysql -u your_username -p litesupabase < db.sql
+    ```
 
-```nginx
-server {
-    listen  80;
-    server_name  your_domain;
-    root   your_web_path/litesupabase/public;
-   
-    location / {
-        index index.html index.php;
-        try_files $uri  /index.php$is_args$args;
+5.  **Configure Your Web Server**
+    Point your web server's (e.g., Nginx or Apache) document root to the project's `public` directory. Here is an example Nginx configuration:
+
+    ```nginx
+    server {
+        listen 80;
+        server_name your_domain.com;
+        root /path/to/your/litesupabase/public;
+
+        index index.php index.html;
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass 127.0.0.1:9000; # Or your PHP-FPM socket
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+
+        location ~ /\.ht {
+            deny all;
+        }
     }
-    
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        fastcgi_index index.php;
-        fastcgi_pass  127.0.0.1:9000;
-    }
+    ```
 
-    location ~ /\. {
-        deny  all;
-    }
-}
+## 🔑 Admin Panel
 
-```
+- **URL**: `http://your_domain.com/admin`
+- **Default Email**: `admin@litesupabase.com`
+- **Default Password**: `123456`
 
-## Project Structure
+**Important**: Please change the default admin password immediately after your first login!
 
-```
-litesupabase/
-├── config/                 # Configuration files
-├── public/                # Public assets and API entry point
-│   └── docs/             # API documentation
-├── src/                   # Source code
-│   ├── Admin/           # Admin dashboard components
-│   ├── Auth/            # Authentication components
-│   ├── Database/        # Database management
-│   ├── Storage/         # File storage components
-│   └── Controllers/     # API controllers
-└── vendor/                # Composer dependencies
-```
+## 📖 API Endpoints
 
-## API Endpoints
+All API endpoints are prefixed with `/api`.
 
-### Authentication
-- `POST /api/auth/signup` - Create new user account
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/forgot` - Request password reset
-- `GET /api/auth/config` - Get auth configuration
-- `GET /api/auth/google/callback` - Google OAuth callback
-- `GET /api/auth/github/callback` - GitHub OAuth callback
+### Auth Endpoints (`/api/auth`)
 
-### Storage
-- `GET /api/storage/buckets` - List buckets
-- `POST /api/storage/buckets` - Create bucket
-- `GET /api/storage/buckets/{bucket}/files` - List files
-- `POST /api/storage/buckets/{bucket}/files` - Upload file
-- `GET /api/storage/buckets/{bucket}/files/{path}` - Download file
-- `DELETE /api/storage/buckets/{bucket}/files/{path}` - Delete file
+- `POST /signup`: Register a new user
+- `POST /login`: Log in a user
+- `POST /logout`: Log out a user (requires authentication)
+- `POST /refresh`: Refresh an access token
+- `POST /forgot`: Request a password reset
+- `GET /user`: Get the current user's information (requires authentication)
+- `GET /config`: Get public authentication configuration
 
-## Security
+### Third-Party Login Callbacks
 
-- All API endpoints (except authentication) require a valid JWT token
-- OAuth 2.0 integration for secure third-party authentication
-- File storage with bucket-level access control
-- Passwords are securely hashed
-- CORS protection for web security
+- `POST /google/callback`: Google login callback
+- `POST /github/callback`: GitHub login callback
 
-## License
+## 🤝 Contributing
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Contributions of all kinds are welcome! Please feel free to open a GitHub Issue or Pull Request to report bugs, suggest features, or contribute code.
+
+## 📄 License
+
+This project is licensed under the [MIT](LICENSE) License.
