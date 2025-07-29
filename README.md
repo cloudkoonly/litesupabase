@@ -8,7 +8,7 @@
 
 ## ✨ Preview
 
-![](https://cdn2.koonly.com/images/2025-05-20/litesupabase-20250520-151449_450.webp)
+![](https://cdn2.koonly.com/images/2025-05-20/litesupabase-20250520-151449_1200.webp)
 
 ## ✨ Features
 
